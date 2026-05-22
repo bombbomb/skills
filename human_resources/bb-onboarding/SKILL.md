@@ -1,6 +1,6 @@
 ---
 name: bb-onboarding
-description: Creates a personalized AI learning plan for BombBomb employees. Use this skill whenever someone mentions "bb-onboarding", "AI onboarding", "AI learning plan", "get started with AI", "AI training plan", or asks how to learn AI for their role at BombBomb. Also trigger when a new team member or existing employee wants to understand how to use AI in their day-to-day work. This skill gathers the person's role and experience level, then spins up parallel research agents to produce a comprehensive, role-tailored AI learning roadmap. Use proactively any time someone seems to want structured AI guidance at BombBomb.
+description: Creates a personalized AI learning plan for BombBomb employees based on their role and experience level. Use for AI onboarding, training plans, or learning roadmaps.
 ---
 
 # BombBomb AI Onboarding Skill
