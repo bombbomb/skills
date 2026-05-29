@@ -1,108 +1,140 @@
 ---
 name: sprint_review
-description: Generates a comprehensive Sprint Review document for the bi-weekly Sprint Review agile meeting. Runs every two weeks on Wednesday.
+description: Generates a comprehensive Sprint Review document for the bi-weekly Sprint Review agile meeting, auto-populated with live data from Jira (bombbomb.atlassian.net). Runs every two weeks on Wednesday.
 ---
 
 # Sprint Review Skill
 
 ## Overview
-This skill automatically generates a structured Sprint Review document to support the bi-weekly Sprint Review agile ceremony. It produces a consistent, comprehensive document that covers all key aspects of the sprint review meeting.
+This skill automatically generates a structured Sprint Review document to support the bi-weekly Sprint Review agile ceremony. It queries live sprint data from Jira and produces a consistent, comprehensive document covering all key aspects of the sprint review meeting.
 
 ## Schedule
 - **Frequency:** Every two weeks on Wednesday
 - **Time:** 10:00 AM (local time)
 - **Automation ID:** c8ad569e-9d4a-4e7f-b213-d4d65a783892
 
+## Jira Integration
+- **Instance:** bombbomb.atlassian.net
+- **Cloud ID:** 2ff71add-6cd0-40ce-98ca-c13c32cc9e9a
+- **Primary Project:** ENGI (Product Engineering)
+- **Additional Projects:** MOB (Mobile), EX (FUNdations), VX (Foundations Team), MON (Money) — optional, add as needed
+- **Sprint Query:** `project = ENGI AND sprint in openSprints() ORDER BY status ASC`
+- **Done Items Query:** `project = ENGI AND sprint in openSprints() AND status = Done ORDER BY updated DESC`
+- **Incomplete Items Query:** `project = ENGI AND sprint in openSprints() AND status != Done ORDER BY status ASC`
+
 ## Usage
 This skill is triggered automatically on a bi-weekly Wednesday schedule. It can also be invoked manually by asking:
 > "Generate a Sprint Review document for today's sprint."
+
+When run, it will:
+1. Query Jira for all issues in the current open sprint(s)
+2. Separate issues into **Done** and **Not Done** categories
+3. Calculate sprint metrics from the live data
+4. Populate the Sprint Review document template with real issue data
+5. Save the result as a note titled `Sprint Review – [Today's Date]`
 
 ## Output
 The skill produces a fully structured Sprint Review document saved as a note titled `Sprint Review – [Today's Date]`.
 
 ## Document Sections
 1. 📋 **Sprint Overview** — Sprint goal, dates, team, Scrum Master, Product Owner
-2. ✅ **Completed Work** — Table of done user stories/tasks with story points
-3. ❌ **Incomplete Work** — Carried-over items with reasons
-4. 📊 **Sprint Metrics** — Velocity, completion rate, bug counts
+2. ✅ **Completed Work** — Live table of Done issues from Jira with issue key, summary, type, and assignee
+3. ❌ **Incomplete Work** — Live table of In Progress / To Do / Pending issues with status
+4. 📊 **Sprint Metrics** — Issue counts, bugs fixed, critical bugs, story points (if available)
 5. 🎯 **Sprint Goal Assessment** — Outcomes vs. expectations
-6. 🚀 **Product Increment / Demo Highlights** — Features delivered and demo notes
-7. 💬 **Stakeholder Feedback** — Feedback captured during the review
+6. 🚀 **Product Increment / Demo Highlights** — Key completed features with Jira links
+7. 💬 **Stakeholder Feedback** — Captured during the review meeting
 8. 🔄 **Backlog Updates** — New, reprioritized, or removed backlog items
 9. 🔍 **Key Decisions & Action Items** — Owners and due dates
-10. 📅 **Next Sprint Preview** — Draft goal, start date, high-priority items
+10. 📅 **Next Sprint Preview** — Carry-over items, draft goal, tentative start date
 
 ## Prompt
 
 ```
-Generate a comprehensive Sprint Review document for today's Sprint Review meeting. The document should be well-structured and include the following sections:
+You are generating a Sprint Review document for today's Sprint Review meeting.
 
-# 🏁 Sprint Review — [Sprint Name/Number] | [Today's Date]
+Today's date is: [Today's Date]
+Jira instance: bombbomb.atlassian.net
+Cloud ID: 2ff71add-6cd0-40ce-98ca-c13c32cc9e9a
+Primary Project: ENGI (Product Engineering)
+
+Step 1 — Query Jira for active sprint data:
+- Fetch all issues in the open sprint: `project = ENGI AND sprint in openSprints() ORDER BY status ASC`
+- Separate issues into two groups:
+  - DONE: status = "Done"
+  - NOT DONE: status in ("To Do", "In Progress", "Code Review", "Ready for Prod", "Pending Approval")
+
+Step 2 — Calculate sprint metrics:
+- Count total issues, done issues, and not-done issues
+- Count bugs fixed (Done + issuetype = Bug)
+- Count critical/high bugs still in progress
+- Sum story points if available (customfield_10016); note "Not tracked" if null
+
+Step 3 — Generate the Sprint Review document using the structure below, populating all sections with real Jira data. Include Jira issue links in the format: https://bombbomb.atlassian.net/browse/[ISSUE-KEY]
+
+---
+
+# 🏁 Sprint Review — ENGI | [Today's Date]
 
 ## 1. 📋 Sprint Overview
-- **Sprint Goal:** [State the sprint goal]
-- **Sprint Dates:** [Start Date] – [End Date]
-- **Team:** [Team name or members]
-- **Scrum Master:** [Name]
-- **Product Owner:** [Name]
+- **Sprint Goal:** [To be filled in by Scrum Master]
+- **Sprint Dates:** [Sprint start date] – [Today's Date]
+- **Team:** Product Engineering (ENGI)
+- **Scrum Master:** [To be filled in]
+- **Product Owner:** [To be filled in]
 
 ## 2. ✅ Completed Work (Done)
-A table or list of all user stories / tasks completed this sprint:
-| Story/Task | Description | Story Points | Status |
+| Issue | Summary | Type | Assignee |
 |---|---|---|---|
-| [ID] | [Summary] | [Points] | ✅ Done |
+[Populate from Jira Done issues]
 
 ## 3. ❌ Incomplete Work (Not Done / Carried Over)
-List any items that were planned but not completed, with a brief reason:
-| Story/Task | Description | Story Points | Reason |
-|---|---|---|---|
-| [ID] | [Summary] | [Points] | [Reason] |
+| Issue | Summary | Type | Assignee | Status |
+|---|---|---|---|---|
+[Populate from Jira Not Done issues]
 
 ## 4. 📊 Sprint Metrics
-- **Total Story Points Planned:** [X]
-- **Total Story Points Completed:** [Y]
-- **Velocity:** [Y pts]
-- **Sprint Completion Rate:** [Y/X * 100]%
-- **Number of Bugs Fixed:** [N]
-- **Number of New Bugs Introduced:** [N]
+- **Total Issues in Sprint:** [N]
+- **Issues Completed (Done):** [N]
+- **Issues Remaining:** [N]
+- **Bugs Fixed:** [N]
+- **Critical/High Bugs Still In Progress:** [N]
+- **Story Points Completed:** [N or "Not tracked"]
 
 ## 5. 🎯 Sprint Goal Assessment
-Did the team achieve the sprint goal? Provide a brief summary of outcomes vs. expectations.
+[To be filled in during the meeting]
 
 ## 6. 🚀 Product Increment / Demo Highlights
-Key features or functionality delivered and demonstrated to stakeholders:
-- **Feature 1:** [Brief description and value delivered]
-- **Feature 2:** [Brief description and value delivered]
-- **Live Demo Notes:** [Any notes from the demo]
+[List the top completed features/fixes from Jira Done items, with issue links and a brief description of value delivered]
 
 ## 7. 💬 Stakeholder Feedback
-Capture feedback received from stakeholders during the review:
-- [Stakeholder name/role]: "[Feedback]"
+[To be filled in during the meeting]
 
 ## 8. 🔄 Backlog Updates
-Changes to the product backlog as a result of this sprint review:
-- **New Items Added:** [List]
-- **Items Reprioritized:** [List]
-- **Items Removed:** [List]
+- **New Items Added:** [To be filled in]
+- **Items Reprioritized:** [To be filled in]
+- **Items Removed:** [To be filled in]
 
 ## 9. 🔍 Key Decisions & Action Items
 | # | Decision/Action | Owner | Due Date |
 |---|---|---|---|
-| 1 | [Description] | [Name] | [Date] |
+[Populate carry-over critical/high items from Jira Not Done list as suggested action items]
 
 ## 10. 📅 Next Sprint Preview
-Brief overview of what's planned for the next sprint:
-- **Next Sprint Goal (Draft):** [Goal]
-- **Tentative Start Date:** [Date]
-- **High-Priority Items:** [List top 3–5 items]
+- **Next Sprint Goal (Draft):** [To be filled in]
+- **Tentative Start Date:** [Today's Date + 1 business day]
+- **Carry-Over High Priority Items:**
+[List top carry-over items from Jira Not Done, prioritized by Critical > High priority]
 
 ---
 
-*Document prepared for the Sprint Review meeting on [Today's Date]. Please update all placeholder fields with actual sprint data before distributing.*
+*Document auto-generated from Jira project ENGI (Product Engineering) active sprint data on [Today's Date]. Please complete all [placeholder] sections before distributing.*
 
 Save this document as a note titled "Sprint Review – [Today's Date]".
 ```
 
 ## Notes
-- Update all placeholder fields with actual sprint data before distributing.
-- Can be customized to include your team name, sprint naming convention, or additional sections specific to your workflow.
+- Fields marked `[To be filled in]` should be completed during or after the Sprint Review meeting.
+- Story points are stored in Jira custom field `customfield_10016`; they are often null in this project.
+- To include additional projects (MOB, EX, VX, MON), extend the JQL query: `project in (ENGI, MOB, EX) AND sprint in openSprints()`.
+- Jira issue links follow the format: `https://bombbomb.atlassian.net/browse/[ISSUE-KEY]`
